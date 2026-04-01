@@ -41,9 +41,11 @@ SmartHomeEnergyMonitor_NakshatraMeena/
 
 ## Circuit Diagram
 ![Circuit Diagram](Circuit_Diagram/Diagram.png)
+![Circuit Diagram](Circuit_Diagram/Diagram_2.png)
 
 ## Dashboard Screenshot
 ![Dashboard](Assets/Dashboard.png)
+![Dashboard](Assets/LED_Buzzer.png)
 
 ## Notes
 - Update `ssid`, `password`, and `access_token` in `SmartEnergyMonitor.ino` before uploading.
