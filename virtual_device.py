@@ -16,7 +16,7 @@ client.connect(BROKER, 1883, 60)
 client.loop_start()  # keep alive
 
 # Store latest data
-latest_data = {"voltage": 0, "current": 0, "power": 0, "temperature": 25}
+latest_data = {"voltage": 0, "current": 0, "power": 0, "alert": 0}
 
 # Function to simulate and send data
 def send_data():
@@ -26,12 +26,19 @@ def send_data():
         current = round(random.uniform(0.5, 2.0), 2)
         power = round(voltage * current, 2)
 
+        # Alert logic
+        alert = 0
+        if voltage > 235 or current > 1.5 or power > 400:
+            alert = 1  # Trigger alert
+
         latest_data = {
             "voltage": voltage,
             "current": current,
-            "power": power
+            "power": power,
+            "alert": alert
         }
 
+        # Publish to ThingsBoard
         client.publish("v1/devices/me/telemetry", json.dumps(latest_data))
         print("Sent:", latest_data)
         time.sleep(2)
@@ -48,66 +55,25 @@ def dashboard():
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Smart Energy Monitor</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0d1117;
-            color: #c9d1d9;
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            text-align: center;
-            padding: 20px;
-            background: linear-gradient(to right, #00ffcc, #0055ff);
-            color: #111;
-            font-size: 2em;
-            font-weight: bold;
-        }
-        .cards {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin: 20px;
-        }
-        .card {
-            flex: 1 1 200px;
-            margin: 10px;
-            padding: 20px;
-            border-radius: 12px;
-            background: #161b22;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-        .card h2 {
-            margin-bottom: 10px;
-            font-size: 1.2em;
-        }
-        .value {
-            font-size: 2em;
-            font-weight: bold;
-        }
-        .green { color: #28a745; }
-        .yellow { color: #ffc107; }
-        .red { color: #dc3545; }
-        .charts {
-            max-width: 800px;
-            margin: auto;
-            padding: 20px;
-        }
-        iframe { border: none; border-radius: 12px; width: 100%; height: 400px; }
-        a { color: #00ffcc; text-decoration: none; }
-        a:hover { text-decoration: underline; }
-        footer {
-            text-align: center;
-            padding: 15px;
-            background: #111;
-            color: #555;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Smart Energy Monitor</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0d1117; color: #c9d1d9; margin: 0; padding: 0; }
+    header { text-align: center; padding: 20px; background: linear-gradient(to right, #00ffcc, #0055ff); color: #111; font-size: 2em; font-weight: bold; }
+    .cards { display: flex; flex-wrap: wrap; justify-content: center; margin: 20px; }
+    .card { flex: 1 1 200px; margin: 10px; padding: 20px; border-radius: 12px; background: #161b22; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+    .card h2 { margin-bottom: 10px; font-size: 1.2em; }
+    .value { font-size: 2em; font-weight: bold; }
+    .green { color: #28a745; }
+    .yellow { color: #ffc107; }
+    .red { color: #dc3545; }
+    .charts { max-width: 800px; margin: auto; padding: 20px; }
+    iframe { border: none; border-radius: 12px; width: 100%; height: 400px; }
+    a { color: #00ffcc; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    footer { text-align: center; padding: 15px; background: #111; color: #555; }
+</style>
 </head>
 <body onload="fetchData()">
 
@@ -126,6 +92,10 @@ def dashboard():
         <h2>Power (W)</h2>
         <p id="power" class="value green">0</p>
     </div>
+    <div class="card">
+        <h2>Alerts</h2>
+        <p id="alert" class="value green">0</p>
+    </div>
 </div>
 
 <div class="charts">
@@ -138,13 +108,10 @@ def dashboard():
 <h2 style="text-align:center;">🔗 GitHub Repository</h2>
 <p style="text-align:center;"><a href="https://github.com/nakshatrameena/Smart_Home_Energy_Monitor_IoT_Project" target="_blank">View Full Project</a></p>
 
-<footer>Made with by Nakshatra Meena</footer>
+<footer>Made by Nakshatra Meena</footer>
 
 <script>
-let voltageData = [];
-let currentData = [];
-let powerData = [];
-let labels = [];
+let voltageData = [], currentData = [], powerData = [], alertData = [], labels = [];
 
 const ctx = document.getElementById('powerChart').getContext('2d');
 const chart = new Chart(ctx, {
@@ -152,42 +119,18 @@ const chart = new Chart(ctx, {
     data: {
         labels: labels,
         datasets: [
-            {
-                label: 'Voltage (V)',
-                data: voltageData,
-                borderColor: '#00ffcc',
-                backgroundColor: 'rgba(0,255,204,0.2)',
-                fill: true,
-                tension: 0.3
-            },
-            {
-                label: 'Current (A)',
-                data: currentData,
-                borderColor: '#ffdd00',
-                backgroundColor: 'rgba(255,221,0,0.2)',
-                fill: true,
-                tension: 0.3
-            },
-            {
-                label: 'Power (W)',
-                data: powerData,
-                borderColor: '#ff4444',
-                backgroundColor: 'rgba(255,68,68,0.2)',
-                fill: true,
-                tension: 0.3
-            }
+            { label: 'Voltage (V)', data: voltageData, borderColor: '#00ffcc', backgroundColor: 'rgba(0,255,204,0.2)', fill: true, tension: 0.3 },
+            { label: 'Current (A)', data: currentData, borderColor: '#ffdd00', backgroundColor: 'rgba(255,221,0,0.2)', fill: true, tension: 0.3 },
+            { label: 'Power (W)', data: powerData, borderColor: '#ff4444', backgroundColor: 'rgba(255,68,68,0.2)', fill: true, tension: 0.3 },
+            { label: 'Alerts', data: alertData, borderColor: '#ff00ff', backgroundColor: 'rgba(255,0,255,0.2)', fill: true, tension: 0.3, pointStyle: 'rectRot', pointRadius: 6 }
         ]
     },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            x: { 
-                title: { display: true, text: 'Time (s)' } 
-            },
-            y: { 
-                title: { display: true, text: 'Value' } 
-            }
+    options: { 
+        responsive: true, 
+        maintainAspectRatio: false, 
+        scales: { 
+            x: { title: { display: true, text: 'Time (s)' } }, 
+            y: { title: { display: true, text: 'Value' } } 
         }
     }
 });
@@ -199,24 +142,22 @@ async function fetchData() {
     document.getElementById('voltage').innerText = data.voltage;
     document.getElementById('current').innerText = data.current;
     document.getElementById('power').innerText = data.power;
+    document.getElementById('alert').innerText = data.alert;
 
-    // Update color based on thresholds
     document.getElementById('voltage').className = 'value ' + (data.voltage > 235 ? 'red' : 'green');
     document.getElementById('current').className = 'value ' + (data.current > 1.5 ? 'red' : 'green');
     document.getElementById('power').className = 'value ' + (data.power > 400 ? 'red' : 'green');
+    document.getElementById('alert').className = 'value ' + (data.alert == 1 ? 'red' : 'green');
 
-    // Update chart
     const now = new Date().toLocaleTimeString();
     labels.push(now);
     voltageData.push(data.voltage);
     currentData.push(data.current);
     powerData.push(data.power);
+    alertData.push(data.alert * 400); // Scale alert for visibility on chart
 
-    if (labels.length > 10) { // keep last 10 data points
-        labels.shift();
-        voltageData.shift();
-        currentData.shift();
-        powerData.shift();
+    if (labels.length > 10) {
+        labels.shift(); voltageData.shift(); currentData.shift(); powerData.shift(); alertData.shift();
     }
 
     chart.update();
