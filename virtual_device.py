@@ -16,7 +16,7 @@ client.connect(BROKER, 1883, 60)
 client.loop_start()  # keep alive
 
 # Store latest data
-latest_data = {"voltage": 0, "current": 0, "power": 0}
+latest_data = {"voltage": 0, "current": 0, "power": 0, "temperature": 25}
 
 # Function to simulate and send data
 def send_data():
@@ -49,7 +49,7 @@ def dashboard():
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Smart Energy Monitor 🚀</title>
+    <title>Smart Energy Monitor</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
@@ -132,13 +132,13 @@ def dashboard():
     <canvas id="powerChart"></canvas>
 </div>
 
-<h2 style="text-align:center;">📊 ThingsBoard Dashboard</h2>
+<h2 style="text-align:center;">ThingsBoard Dashboard</h2>
 <iframe src="https://thingsboard.cloud/dashboard/eeebd8f0-2f02-11f1-8704-2bfb9206c3d7?publicId=cb6d3d60-3010-11f1-9c6f-b71bb2771567"></iframe>
 
 <h2 style="text-align:center;">🔗 GitHub Repository</h2>
 <p style="text-align:center;"><a href="https://github.com/nakshatrameena/Smart_Home_Energy_Monitor_IoT_Project" target="_blank">View Full Project</a></p>
 
-<footer>Made with ❤️ by Nakshatra Meena</footer>
+<footer>Made with by Nakshatra Meena</footer>
 
 <script>
 let voltageData = [];
