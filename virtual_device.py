@@ -22,15 +22,25 @@ latest_data = {"voltage": 0, "current": 0, "power": 0, "alert": 0}
 def send_data():
     global latest_data
     while True:
+        # Generate random data
         voltage = round(random.uniform(220, 240), 2)
         current = round(random.uniform(0.5, 2.0), 2)
         power = round(voltage * current, 2)
 
-        # Alert logic
-        alert = 0
-        if voltage > 235 or current > 1.5 or power > 400:
-            alert = 1  # Trigger alert
+        # Thresholds
+        voltage_thresh = 235
+        current_thresh = 1.5
+        power_thresh = 400
 
+        # Calculate alert magnitude
+        voltage_alert = max(0, voltage - voltage_thresh)  # 0 if below threshold
+        current_alert = max(0, current - current_thresh)
+        power_alert = max(0, power - power_thresh)
+
+        # Combined alert (can be weighted if needed)
+        alert = round(voltage_alert + current_alert + power_alert, 2)
+
+        # Store latest data
         latest_data = {
             "voltage": voltage,
             "current": current,
@@ -41,6 +51,7 @@ def send_data():
         # Publish to ThingsBoard
         client.publish("v1/devices/me/telemetry", json.dumps(latest_data))
         print("Sent:", latest_data)
+
         time.sleep(2)
 
 # API route to fetch data
