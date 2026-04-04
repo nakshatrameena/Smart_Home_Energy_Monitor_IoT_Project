@@ -38,6 +38,7 @@ SmartHomeEnergyMonitor_NakshatraMeena/
 3. Connect the ESP32 to your WiFi network and ThingsBoard using your access token.
 4. View real-time telemetry and appliance status on the ThingsBoard dashboard.
 5. Set alerts for high power usage and control appliances remotely.
+6. Access the live web dashboard: [Smart Energy Monitor Live](https://smart-home-energy-monitor-iot-project.onrender.com/)
 
 ## Circuit Diagram
 ![Circuit Diagram](Circuit_Diagram/Diagram.png)
