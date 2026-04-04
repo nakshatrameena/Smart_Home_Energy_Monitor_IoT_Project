@@ -34,7 +34,9 @@ def home():
     return "IoT Device Running"
 
 # Run MQTT in background
-threading.Thread(target=send_data).start()
+threading.Thread(target=send_data, daemon=True).start()
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    import os
+port = int(os.environ.get("PORT", 10000))
+app.run(host="0.0.0.0", port=port)
