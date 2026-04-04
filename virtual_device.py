@@ -1,27 +1,40 @@
-import time
-import random
-import requests
-import json
+from flask import Flask
+import paho.mqtt.client as mqtt
+import time, random, json, threading
 
-# ThingsBoard Cloud URL & token
-url = "https://thingsboard.cloud/api/v1/Twxv1yhVrF3fqhyzcQsy/telemetry"
+app = Flask(__name__)
 
-voltage = 230.0
-powerThreshold = 2000
+# ThingsBoard config
+broker = "thingsboard.cloud"
+access_token = "YOUR_NEW_TOKEN"
 
-while True:
-    # Simulate sensor reading (0-1023 like analogRead)
-    sensorValue = random.randint(400, 600)
-    current = (sensorValue - 512) * (5.0 / 1023.0) / 0.066
-    power = current * voltage
+client = mqtt.Client(protocol=mqtt.MQTTv311)
+client.username_pw_set(access_token)
+client.connect(broker, 1883, 60)
 
-    # Prepare JSON
-    msg = {"current": round(current, 2), "power": round(power, 2)}
-    
-    # Send to ThingsBoard
-    requests.post(url, json=msg)
-    
-    print("Sent:", msg)
-    
-    # Simulate delay
-    time.sleep(2)
+def send_data():
+    while True:
+        voltage = round(random.uniform(220, 240), 2)
+        current = round(random.uniform(0.5, 2.0), 2)
+        power = round(voltage * current, 2)
+
+        data = {
+            "voltage": voltage,
+            "current": current,
+            "power": power
+        }
+
+        client.publish("v1/devices/me/telemetry", json.dumps(data))
+        print("Sent:", data)
+
+        time.sleep(2)
+
+@app.route("/")
+def home():
+    return "IoT Device Running"
+
+# Run MQTT in background
+threading.Thread(target=send_data).start()
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=10000)
