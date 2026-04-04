@@ -2,6 +2,14 @@
 
 **Author: NAKSHATRA MEENA**
 
+## 🌐 Live Project Demo
+
+👉 <a href="https://smart-home-energy-monitor-iot-project.onrender.com/" target="_blank" class="btn btn-green">
+      Smart Energy Monitor Dashboard Live
+    </a>
+
+---
+
 ## Project Overview
 This project monitors home appliance energy consumption in real-time using an ESP32 microcontroller. It allows remote ON/OFF control of appliances and sends alerts for high power usage.
 
@@ -38,7 +46,6 @@ SmartHomeEnergyMonitor_NakshatraMeena/
 3. Connect the ESP32 to your WiFi network and ThingsBoard using your access token.
 4. View real-time telemetry and appliance status on the ThingsBoard dashboard.
 5. Set alerts for high power usage and control appliances remotely.
-6. Access the live web dashboard: [Smart Energy Monitor Live](https://smart-home-energy-monitor-iot-project.onrender.com/)
 
 ## Circuit Diagram
 ![Circuit Diagram](Circuit_Diagram/Diagram.png)
