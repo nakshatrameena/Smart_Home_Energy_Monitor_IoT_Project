@@ -47,14 +47,6 @@ SmartHomeEnergyMonitor_NakshatraMeena/
 4. View real-time telemetry and appliance status on the ThingsBoard dashboard.
 5. Set alerts for high power usage and control appliances remotely.
 
-## Circuit Diagram
-![Circuit Diagram](Circuit_Diagram/Diagram.png)
-![Circuit Diagram](Circuit_Diagram/Diagram_2.png)
-
-## Dashboard Screenshot
-![Dashboard](Assets/Dashboard.png)
-![Dashboard](Assets/LED_Buzzer.png)
-
 ## Notes
 - Update `ssid`, `password`, and `access_token` in `SmartEnergyMonitor.ino` before uploading.
 - Adjust `powerThreshold` in the code according to your appliance’s rating.
